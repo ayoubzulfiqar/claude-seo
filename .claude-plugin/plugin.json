@@ -1,7 +1,7 @@
 {
   "name": "claude-seo",
-  "version": "1.9.9",
-  "description": "Comprehensive SEO analysis plugin for Claude Code. 25 sub-skills (21 core + 1 orchestrator + 1 framework integration + 2 extension mirrors) and 18 sub-agents (15 core + 1 framework integration + 2 extension mirrors) covering technical SEO, content quality (E-E-A-T), content briefs, schema markup, image optimization, sitemap architecture, AI search optimization (GEO), local SEO, maps intelligence, semantic topic clustering, search experience optimization (SXO), SEO drift monitoring, e-commerce SEO, international SEO with cultural profiles, FLOW framework integration, Google API integration, PDF reporting, and strategic planning across all industries.",
+  "version": "2.2.0",
+  "description": "Comprehensive SEO analysis plugin for Claude Code. 25 sub-skills (21 core + 1 orchestrator + 1 framework + 2 extension mirrors) and 18 sub-agents cover technical SEO, content quality, schema, sitemaps, Core Web Vitals, local SEO, backlinks, AI/GEO, ecommerce, hreflang, SXO, clustering, drift monitoring, and Google APIs. Includes optional MCP extensions, SPA-aware rendering, portability, and hardened SSRF/DNS-rebinding safe fetchers.",
   "author": {
     "name": "AgriciDaniel",
     "email": "agricidaniel@gmail.com",
@@ -10,7 +10,6 @@
   "license": "MIT",
   "homepage": "https://claude-seo.md",
   "repository": "https://github.com/AgriciDaniel/claude-seo",
-  "category": "marketing",
   "keywords": [
     "seo",
     "technical-seo",
@@ -43,6 +42,11 @@
     "ecommerce-seo",
     "google-shopping",
     "cultural-profiles",
-    "content-parity"
+    "content-parity",
+    "mcp-extensions",
+    "headless-rendering",
+    "ssrf-safe-fetchers",
+    "ai-citation-optimization",
+    "synthesis-framework"
   ]
 }

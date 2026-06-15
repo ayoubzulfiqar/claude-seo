@@ -58,6 +58,12 @@ def test_plugin_json_skill_count_matches_disk():
     )
 
 
+def test_plugin_json_description_fits_registry_limit():
+    """plugin.json description must stay below the Claude plugin registry limit."""
+    plugin = json.loads(PLUGIN_JSON.read_text())
+    assert len(plugin["description"]) < 500
+
+
 def test_plugin_json_subagent_count_matches_disk():
     """plugin.json description's 'N sub-agents' claim must equal agents/ count."""
     plugin = json.loads(PLUGIN_JSON.read_text())
@@ -372,4 +378,63 @@ def test_canonical_math_adds_up():
     assert sum(parts) == headline, (
         f"plugin.json canonical phrasing breakdown {breakdown!r} sums to "
         f"{sum(parts)} but headline claims {headline}. Math must add up."
+    )
+
+
+def test_reference_files_have_at_least_one_link():
+    """Every skills/*/references/*.md file must be cited somewhere in the repo.
+
+    Guards against orphan reference files — docs on disk that no SKILL.md,
+    agent, top-level doc, or other reference file actually links to. Catches
+    drift like the v2.0.0-era incident where llmstxt-evidence.md landed in
+    references/ but was reachable only through a sibling cross-link, not
+    through its parent SKILL.md.
+
+    Cross-skill references are legitimate (e.g. skills/seo/references/
+    backlink-quality.md is cited from seo-backlinks/SKILL.md) so the search
+    is repo-wide rather than per-parent-skill.
+
+    Searches the full filename (`name.md`) and the Obsidian-style wikilink
+    form (`[[name]]`) across: every SKILL.md, every agent .md, every doc/*.md,
+    top-level README/CHANGELOG/CLAUDE/AGENTS/CONTRIBUTING, and every other
+    reference file. Each reference is excluded from its own search.
+    """
+    ref_files = list((REPO_ROOT / "skills").glob("*/references/*.md"))
+    if not ref_files:
+        return  # no references at all — nothing to check
+
+    search_paths: list[Path] = []
+    search_paths += list((REPO_ROOT / "skills").glob("*/SKILL.md"))
+    search_paths += list((REPO_ROOT / "agents").glob("*.md"))
+    search_paths += list((REPO_ROOT / "docs").glob("*.md"))
+    for doc in ("README.md", "CHANGELOG.md", "CLAUDE.md",
+                "AGENTS.md", "CONTRIBUTING.md"):
+        candidate = REPO_ROOT / doc
+        if candidate.exists():
+            search_paths.append(candidate)
+    # Reference files can cite each other (e.g. via [[wikilink]]).
+    search_paths += ref_files
+
+    text_by_path = {p: p.read_text() for p in search_paths}
+
+    orphans = []
+    for ref in ref_files:
+        slug = ref.stem  # 'llmstxt-evidence'
+        filename = ref.name  # 'llmstxt-evidence.md'
+        wikilink = f"[[{slug}]]"
+        found = False
+        for other_path, text in text_by_path.items():
+            if other_path == ref:
+                continue
+            if filename in text or wikilink in text:
+                found = True
+                break
+        if not found:
+            orphans.append(str(ref.relative_to(REPO_ROOT)))
+
+    assert not orphans, (
+        "Orphan reference files (on disk, not cited anywhere repo-wide):\n  "
+        + "\n  ".join(orphans)
+        + "\n\nFix: link the file from its parent SKILL.md, a related "
+          "reference doc, or a top-level doc — or delete if obsolete."
     )
